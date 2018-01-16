@@ -17,9 +17,9 @@ So I decided to implement my own UPROPERTY specifier that would store the defaul
 
 Firstly the UnrealHeaderTool needs to be tweaked to include our new UPROPERTY, all of it's code is located in Source/Programs/UnrealHeaderTool/ and we will first need to change Private/Specifiers/VariableSpecifiers.def
 This contains all of the UPROPERTY specifiers, you might find one that you haven't seen before (as I did)! For my UPROPERTY I called my specifier CDOOnly so I added a line like all the others, in alphabetical order:
-
+```
 VARIABLE_SPECIFIER(CDOOnly)
-
+```
 Next we need to edit the Engine side a little to hold our new Property specifier, under Source/Runtime/CoreUObject/Public/UObject/ObjectMacros.h
 
 At line 364 (4.17) begins the list of CPFs aka the property specifiers. Right at the bottom after CPF_SkipSerialization we will add our own. It's important to point out that these specifiers are packed into a 64 bit mask, currently epic has used 56 bits of this mask, leaving 8 bits free, so don't go too crazy adding specifiers.
