@@ -38,7 +38,7 @@ So add our new CPF specifier at the end like so:
 #define CPF_CDOOnly DECLARE_UINT64(0x0100000000000000) // Property will only export to the CDO object, instances will not be copied
 {% endhighlight %}
 
-Back to the UnrealHeaderTool, now we need to edit the Private/HeaderParserTool.cpp file, this is where your headers get parsed, things that check that you haven't forgotten your .generated.h files or that you have used the right UCLASS or USTRUCT specifiers. It all goes here. We want to go the void FHeaderParser::GetVarType function under the huge switch statement, we want to put our new property specifier at the bottom, or just search for case EVariableSpecifier::SkipSerialization: and put the following below it:
+Back to the UnrealHeaderTool, now we need to edit the Private/HeaderParserTool.cpp file, this is where your headers get parsed, the thing that check that you haven't forgotten your .generated.h files or that you have used the right UCLASS or USTRUCT specifiers, it all goes here. We want to go the void FHeaderParser::GetVarType function under the huge switch statement, we want to put our new property specifier at the bottom (or top if you want), or just search for case EVariableSpecifier::SkipSerialization: and put the following below it:
 {% highlight cpp %}
 case EVariableSpecifier::CDOOnly:
 {
@@ -47,7 +47,7 @@ case EVariableSpecifier::CDOOnly:
 break;
 {% endhighlight %}
 
-That's it, you now have made a custom UPROPERTY specifier, that does nothing. From here, you could check that the specifier is being used properly (further down), or you could move onto the engine side implementation.
+That's it, you now have made a custom UPROPERTY specifier, that does nothing. From here, you could check that the specifier is being used properly such as if you want the specifier only applied to uobjects, or you could move onto the engine side implementation.
 
 From here it really depends what you want your UPROPERTY specifier to do, I will continue how I added my implementation but this is just for my implementation.
 
@@ -89,7 +89,7 @@ if (bCanUsePostConstructLink)
 }
 {% endhighlight %}
 
-This is actually only for when the game starts, when the CDO is not fully initialized so the engine does a manual copy of each property. Usually this will only occur on the class' subobjects such as the components. Otherwise the properties get skipped and are copied over in the InitPropertiesFromCustomList method, we can prevent our property being editted in the code below.
+This is actually only for when the game starts, when the CDO is not fully initialized so the engine does a manual copy of each property. Usually this will only occur on the class' subobjects such as the components. Otherwise the properties get skipped and are copied over in the InitPropertiesFromCustomList method, we can prevent our property being copied in the code below.
 
 The code in InitPropertiesFromCustomList simply iterates over custom properties defined or editted in blueprints. We can stop our property from entering this 'list' in BlueprintGeneratedClass.cpp in the UBlueprintGeneratedClass::BuildCustomPropertyListForPostConstruction at line 376 we want to make the following change:
 {% highlight cpp %} 
