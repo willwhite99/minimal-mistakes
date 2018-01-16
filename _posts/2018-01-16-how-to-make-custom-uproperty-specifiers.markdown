@@ -12,7 +12,7 @@ tags:
 ---
 
 ### Intro
-Firstly this is an engine modification, if you are not comfortable doing engine modifications then this post might not be for you. If you are interested but don't know how <a href="https://docs.unrealengine.com/latest/INT/GettingStarted/DownloadingUnrealEngine/" target="_blank">look here</a>.
+Firstly this is an engine modification, if you are not comfortable doing engine modifications then this post might not be for you. If you are interested but don't know how <a href="https://docs.unrealengine.com/latest/INT/GettingStarted/DownloadingUnrealEngine/" target="_blank">look here</a> (and make sure to get access to the <a href="https://www.unrealengine.com/en-US/ue4-on-github" target="_blank">source</a>).
 
 Have you ever wondered how to make your own UPROPERTY specifiers? I did recently when I came across a problem in my project, I wanted a class derived in blueprint to have properties that I could edit in editor, but I didn't want all instances to hold copies of this data. As my project holds hundreds of instances at any time, it is a huge waste of memory. But I needed access to these defaults (I did not need them to change ever), I first tried the Transient property but this didn't work and my instances were still copying over data, I then tried with the Instanced property which worked! However this only works if the property is a UObject (which is required by the Instanced property), which not all of my properties were.
 
