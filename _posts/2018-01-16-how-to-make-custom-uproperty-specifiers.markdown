@@ -11,14 +11,14 @@ tags:
 - c++
 ---
 
-###Intro
+### Intro
 Firstly this is an engine modification, if you are not comfortable doing engine modifications then this post might not be for you. If you are interested but don't know how [look here](https://docs.unrealengine.com/latest/INT/GettingStarted/DownloadingUnrealEngine/).
 
 Have you ever wondered how to make your own UPROPERTY specifiers? I did recently when I came across a problem in my project, I wanted a class derived in blueprint to have properties that I could edit in editor, but I didn't want all instances to hold copies of this data. As my project holds hundreds of instances at any time, it is a huge waste of memory. But I needed access to these defaults (I did not need them to change ever), I first tried the Transient property but this didn't work and my instances were still copying over data, I then tried with the Instanced property which worked! However this only works if the property is a UObject (which is required by the Instanced property), which not all of my properties were.
 
 So I decided to implement my own UPROPERTY specifier that would store the defaults in the CDO but not any instances that were spawned from it.
 
-###Implementation
+### Implementation
 Firstly the UnrealHeaderTool needs to be tweaked to include our new UPROPERTY, all of it's code is located in Source/Programs/UnrealHeaderTool/ and we will first need to change Private/Specifiers/VariableSpecifiers.def
 This contains all of the UPROPERTY specifiers, you might find one that you haven't seen before (as I did)! For my UPROPERTY I called my specifier CDOOnly so I added a line like all the others, in alphabetical order:
 ```
@@ -79,5 +79,5 @@ Lastly in BlueprintGeneratedClass.cpp in the UBlueprintGeneratedClass::BuildCust
 if (!bIsConfigProperty && (!bIsTransientProperty || !Property->ContainsInstancedObjectProperty()) && !Property->HasAnyPropertyFlags(CPF_CDOOnly))
 {% endhighlight %}
 
-###Conclusion
+### Conclusion
 Following this we can add CDOOnly to our UPROPERTYs and at runtime only the CDO will hold any data for that property.
