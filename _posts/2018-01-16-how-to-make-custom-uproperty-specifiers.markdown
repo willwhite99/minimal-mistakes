@@ -44,7 +44,7 @@ From here it really depends what you want your UPROPERTY specifier to do, I will
 The way my specifier works is that I need to prevent the duplication of the CDO properties, this happens in 2 places, ObjectGlobals.cpp and BlueprintGeneratedClass.cpp.
 
 In ObjectGlobals.cpp under FObjectInitializer::InitProperties we want to change a single line from line 3026 (4.17)
-
+{% highlight cpp %}
 for (UProperty* P = bCanUsePostConstructLink ? Class->PostConstructLink : Class->PropertyLink; P; P = bCanUsePostConstructLink ? P->PostConstructLinkNext : P->PropertyLinkNext)
 		{
 			if (bNeedInitialize)
@@ -69,7 +69,8 @@ for (UProperty* P = bCanUsePostConstructLink ? Class->PostConstructLink : Class-
 		}
 {% endhighlight %}
 
-Lastly in BlueprintGeneratedClass.cpp in the UBlueprintGeneratedClass::BuildCustomPropertyListForPostConstruction at line 376 we want to change the line to: 
+Lastly in BlueprintGeneratedClass.cpp in the UBlueprintGeneratedClass::BuildCustomPropertyListForPostConstruction at line 376 we want to change the line to:
+{% highlight cpp %} 
 if (!bIsConfigProperty && (!bIsTransientProperty || !Property->ContainsInstancedObjectProperty()) && !Property->HasAnyPropertyFlags(CPF_CDOOnly))
 {% endhighlight %}
 
