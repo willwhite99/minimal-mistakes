@@ -17,6 +17,7 @@ So I decided to implement my own UPROPERTY specifier that would store the defaul
 
 Firstly the UnrealHeaderTool needs to be tweaked to include our new UPROPERTY, all of it's code is located in Source/Programs/UnrealHeaderTool/ and we will first need to change Private/Specifiers/VariableSpecifiers.def
 This contains all of the UPROPERTY specifiers, you might find one that you haven't seen before (as I did)! For my UPROPERTY I called my specifier CDOOnly so I added a line like all the others, in alphabetical order:
+
 VARIABLE_SPECIFIER(CDOOnly)
 
 Next we need to edit the Engine side a little to hold our new Property specifier, under Source/Runtime/CoreUObject/Public/UObject/ObjectMacros.h
@@ -25,7 +26,7 @@ At line 364 (4.17) begins the list of CPFs aka the property specifiers. Right at
 
 So add our new CPF specifier at the end like so:
 {% highlight cpp %}
-#define CPF_CDOOnly							DECLARE_UINT64(0x0100000000000000)		// Property will only export to the CDO object, instances will not be copied
+#define CPF_CDOOnly DECLARE_UINT64(0x0100000000000000) // Property will only export to the CDO object, instances will not be copied
 {% endhighlight %}
 
 Back to the UnrealHeaderTool, now we need to edit the Private/HeaderParserTool.cpp file, this is where your headers get parsed, things that check that you haven't forgotten your .generated.h files or that you have used the right UCLASS or USTRUCT specifiers. It all goes here. We want to go the void FHeaderParser::GetVarType function under the huge switch statement, we want to put our new property specifier at the bottom, or just search for case EVariableSpecifier::SkipSerialization: and put the following below it:
@@ -46,27 +47,27 @@ The way my specifier works is that I need to prevent the duplication of the CDO 
 In ObjectGlobals.cpp under FObjectInitializer::InitProperties we want to change a single line from line 3026 (4.17)
 {% highlight cpp %}
 for (UProperty* P = bCanUsePostConstructLink ? Class->PostConstructLink : Class->PropertyLink; P; P = bCanUsePostConstructLink ? P->PostConstructLinkNext : P->PropertyLinkNext)
-		{
-			if (bNeedInitialize)
-			{		
-				bNeedInitialize = InitNonNativeProperty(P, Obj);
-			}
+{
+	if (bNeedInitialize)
+	{		
+		bNeedInitialize = InitNonNativeProperty(P, Obj);
+	}
 
-			bool IsTransient = P->HasAnyPropertyFlags(CPF_Transient | CPF_DuplicateTransient | CPF_NonPIEDuplicateTransient);
-			if (!IsTransient || !P->ContainsInstancedObjectProperty() && !P->HasAnyPropertyFlags(CPF_CDOOnly))
-			{
-				if (bCopyTransientsFromClassDefaults && IsTransient)
-				{
-					// This is a duplicate. The value for all transient or non-duplicatable properties should be copied
-					// from the source class's defaults.
-					P->CopyCompleteValue_InContainer(Obj, ClassDefaults);
-				}
-				else if (P->IsInContainer(DefaultsClass))
-				{
-					P->CopyCompleteValue_InContainer(Obj, DefaultData);
-				}
-			}
+	bool IsTransient = P->HasAnyPropertyFlags(CPF_Transient | CPF_DuplicateTransient | CPF_NonPIEDuplicateTransient);
+	if (!IsTransient || !P->ContainsInstancedObjectProperty() && !P->HasAnyPropertyFlags(CPF_CDOOnly))
+	{
+		if (bCopyTransientsFromClassDefaults && IsTransient)
+		{
+			// This is a duplicate. The value for all transient or non-duplicatable properties should be copied
+			// from the source class's defaults.
+			P->CopyCompleteValue_InContainer(Obj, ClassDefaults);
 		}
+		else if (P->IsInContainer(DefaultsClass))
+		{
+			P->CopyCompleteValue_InContainer(Obj, DefaultData);
+		}
+	}
+}
 {% endhighlight %}
 
 Lastly in BlueprintGeneratedClass.cpp in the UBlueprintGeneratedClass::BuildCustomPropertyListForPostConstruction at line 376 we want to change the line to:
