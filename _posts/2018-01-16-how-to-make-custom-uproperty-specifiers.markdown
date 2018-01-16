@@ -58,7 +58,7 @@ for (UProperty* P = bCanUsePostConstructLink ? Class->PostConstructLink : Class-
 	}
 
 	bool IsTransient = P->HasAnyPropertyFlags(CPF_Transient | CPF_DuplicateTransient | CPF_NonPIEDuplicateTransient);
-	if (!IsTransient || !P->ContainsInstancedObjectProperty() && !P->HasAnyPropertyFlags(CPF_CDOOnly))
+--->	if (!IsTransient || !P->ContainsInstancedObjectProperty() && !P->HasAnyPropertyFlags(CPF_CDOOnly))
 	{
 		if (bCopyTransientsFromClassDefaults && IsTransient)
 		{
@@ -76,7 +76,16 @@ for (UProperty* P = bCanUsePostConstructLink ? Class->PostConstructLink : Class-
 
 Lastly in BlueprintGeneratedClass.cpp in the UBlueprintGeneratedClass::BuildCustomPropertyListForPostConstruction at line 376 we want to change the line to:
 {% highlight cpp %} 
-if (!bIsConfigProperty && (!bIsTransientProperty || !Property->ContainsInstancedObjectProperty()) && !Property->HasAnyPropertyFlags(CPF_CDOOnly))
+for (UProperty* Property = InStruct->PropertyLink; Property; Property = Property->PropertyLinkNext)
+	{
+		const bool bIsConfigProperty = Property->HasAnyPropertyFlags(CPF_Config) && !(OwnerClass && OwnerClass->HasAnyClassFlags(CLASS_PerObjectConfig));
+		const bool bIsTransientProperty = Property->HasAnyPropertyFlags(CPF_Transient | CPF_DuplicateTransient | CPF_NonPIEDuplicateTransient);
+
+		// Skip config properties as they're already in the PostConstructLink chain. Also skip transient properties if they contain a reference to an instanced subobjects (as those should not be initialized from defaults).
+--->		if (!bIsConfigProperty && (!bIsTransientProperty || !Property->ContainsInstancedObjectProperty()) && !Property->HasAnyPropertyFlags(CPF_CDOOnly))
+		{
+			for (int32 Idx = 0; Idx < Property->ArrayDim; Idx++)
+			{
 {% endhighlight %}
 
 ### Conclusion
