@@ -38,7 +38,7 @@ So add our new CPF specifier at the end like so:
 #define CPF_CDOOnly DECLARE_UINT64(0x0100000000000000) // Property will only export to the CDO object, instances will not be copied
 {% endhighlight %}
 
-Back to the UnrealHeaderTool, now we need to edit the Private/HeaderParserTool.cpp file, this is where your headers get parsed, the thing that check that you haven't forgotten your .generated.h files or that you have used the right UCLASS or USTRUCT specifiers, it all goes here. We want to go the void FHeaderParser::GetVarType function under the huge switch statement, we want to put our new property specifier at the bottom (or top if you want), or just search for case EVariableSpecifier::SkipSerialization: and put the following below it:
+Back to the UnrealHeaderTool, now we need to edit the Private/HeaderParserTool.cpp file, this is where your headers get parsed, the thing that check that you haven't forgotten your .generated.h files or that you have used the right UCLASS or USTRUCT specifiers, it all goes here. We want to go the FHeaderParser::GetVarType function under the huge switch statement, we want to put our new property specifier at the bottom (or top if you want), or just search for case EVariableSpecifier::SkipSerialization: and put the following below it:
 {% highlight cpp %}
 case EVariableSpecifier::CDOOnly:
 {
