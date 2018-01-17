@@ -21,7 +21,7 @@ UPROPERTY(EditDefaultsOnly, Category="Test")
 TArray<FMyStruct> SomeInformation;
 {% endhighlight %}
 
-So I decided to implement my own UPROPERTY specifier that would store the defaults in the CDO but not any instances that were spawned from it.
+I could just make all my instances delete the copied data when they are created, however I foresaw that I might be doing this a few times throughout my project. So I decided to implement my own UPROPERTY specifier that would store the defaults in the CDO but not any instances that were spawned from it.
 
 ### Implementation
 Firstly the UnrealHeaderTool needs to be tweaked to include our new UPROPERTY, all of it's code is located in Source/Programs/UnrealHeaderTool/ and we will first need to change Private/Specifiers/VariableSpecifiers.def
